@@ -1,20 +1,27 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "simple-ssh-bastion.fullname" . }}
   labels:
     {{- include "simple-ssh-bastion.labels" . | nindent 4 }}
 spec:
+  serviceName: {{ include "simple-ssh-bastion.fullname" . }}  # Required for a StatefulSet
   replicas: {{ .Values.replicaCount }}
-  {{- if .Values.strategy }}
-  strategy:
-    {{- with .Values.strategy }}
-      {{- toYaml . | nindent 4 }}
+
+  {{- if .Values.updateStrategy }}
+  updateStrategy:
+    {{- with .Values.updateStrategy }}
+      {{- toYaml . | nindent 2 }}
     {{- end }}
+  {{- else }}
+  updateStrategy:
+    type: RollingUpdate
   {{- end }}
+
   selector:
     matchLabels:
       {{- include "simple-ssh-bastion.selectorLabels" . | nindent 6 }}
+
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -23,9 +30,10 @@ spec:
       {{- end }}
       labels:
         {{- include "simple-ssh-bastion.labels" . | nindent 8 }}
-	{{- with .Values.podLabels }}
+        {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -34,6 +42,7 @@ spec:
       serviceAccountName: {{ include "simple-ssh-bastion.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -50,61 +59,75 @@ spec:
               {{- end }}
               echo 'export PS1="\\[\\033[01;32m\\]\\u\\[\\033[00m\\]@\\[\\033[01;33m\\]{{ .Values.bastion.hostname }}\\[\\033[00m\\]:\\w\\$ "' >> /etc/profile
               if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
-                # Generate SSH keys
                 ssh-keygen -A
               fi
               rm /etc/motd
-              adduser -D {{ .Values.bastion.sshUser }};
-              passwd -u {{ .Values.bastion.sshUser }};
-              mkdir /home/{{ .Values.bastion.sshUser }}/.ssh;
-              chmod 744 /home/{{ .Values.bastion.sshUser }}/.ssh;
-              chown -R 1000:1000 /home/{{ .Values.bastion.sshUser }};
-              rm /home/{{ $.Values.bastion.sshUser }}/.ssh/authorized_keys;
+              adduser -D {{ .Values.bastion.sshUser }}
+              passwd -u {{ .Values.bastion.sshUser }}
+              mkdir /home/{{ .Values.bastion.sshUser }}/.ssh
+              chmod 744 /home/{{ .Values.bastion.sshUser }}/.ssh
+              chown -R 1000:1000 /home/{{ .Values.bastion.sshUser }}
+              rm /home/{{ .Values.bastion.sshUser }}/.ssh/authorized_keys
               {{- range .Values.bastion.sshKeys }}
-              echo "{{ . }}" >> /home/{{ $.Values.bastion.sshUser }}/.ssh/authorized_keys;
+              echo "{{ . }}" >> /home/{{ $.Values.bastion.sshUser }}/.ssh/authorized_keys
               {{- end }}
-              /usr/sbin/sshd -D -e
+              echo 'export AWS_CONTAINER_CREDENTIALS_FULL_URI="http://169.254.170.23/v1/credentials"' > /home/{{ .Values.bastion.sshUser }}/.profile
+              echo 'export AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE="/var/run/secrets/pods.eks.amazonaws.com/serviceaccount/eks-pod-identity-token"' >> /home/{{ .Values.bastion.sshUser }}/.profile
+              chmod 644 /home/{{ .Values.bastion.sshUser }}/.profile
+              chown -R 1000:1000 /home/{{ .Values.bastion.sshUser }}/.profile
+              touch /var/log/sshd.log
+              (while true; do sleep 3600; truncate -s 0 /var/log/sshd.log; done) &
+              tail -F /var/log/sshd.log &
+              /usr/sbin/sshd -D -E /var/log/sshd.log
+
           ports:
             - name: ssh
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+
           livenessProbe:
             tcpSocket:
               port: ssh
           readinessProbe:
             tcpSocket:
               port: ssh
+
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+
           volumeMounts:
-          - name: ssh-config
-            mountPath: /etc/ssh/sshd_config
-            subPath: sshd_config
-          {{- if .Values.persistence.enabled }}
-          - name: {{ include "simple-ssh-bastion.fullname" . }}
-            mountPath: /etc/ssh
-            subPath: ssh
-          - name: {{ include "simple-ssh-bastion.fullname" . }}
-            mountPath: /home/{{ .Values.bastion.sshUser }}
-            subPath: home
-          {{- end }}
-      volumes:   
-      - name: ssh-config
-        configMap:
-          name: {{ include "simple-ssh-bastion.fullname" . }}-ssh-config
-      {{- if .Values.persistence.enabled }}
-      - name: {{ include "simple-ssh-bastion.fullname" . }}
-        persistentVolumeClaim:
-          claimName: {{ include "simple-ssh-bastion.fullname" . }}
-      {{- end }}
+            - name: ssh-config
+              mountPath: /etc/ssh/sshd_config
+              subPath: sshd_config
+            {{- if .Values.persistence.enabled }}
+            - name: {{ include "simple-ssh-bastion.fullname" . }}
+              mountPath: /etc/ssh
+              subPath: ssh
+            - name: {{ include "simple-ssh-bastion.fullname" . }}
+              mountPath: /home/{{ .Values.bastion.sshUser }}
+              subPath: home
+            {{- end }}
+      volumes:
+        - name: ssh-config
+          configMap:
+            name: {{ include "simple-ssh-bastion.fullname" . }}-ssh-config
+
+        {{- if .Values.persistence.enabled }}
+        - name: {{ include "simple-ssh-bastion.fullname" . }}
+          persistentVolumeClaim:
+            claimName: {{ include "simple-ssh-bastion.fullname" . }}
+        {{- end }}
+
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
       {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}

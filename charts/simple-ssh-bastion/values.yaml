@@ -16,22 +16,23 @@ bastion:
     ClientAliveCountMax: 3
     PermitRootLogin: "no"
     PasswordAuthentication: "no"
+    LogLevel: "VERBOSE"
+    SyslogFacility: "AUTH"
   packages:
     - "nano"
 
 service:
   type: LoadBalancer
   port: 22
-  #annotations:
   #  external-dns.alpha.kubernetes.io/hostname: bastion.example.com.
   #  service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
-  #loadBalancerSourceRanges: []
+  # loadBalancerSourceRanges: []
 
 image:
   repository: alpine
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "3.19.1"
+  tag: "3.20.3"
 
 persistence:
   enabled: true
@@ -40,9 +41,7 @@ persistence:
 
 # deployment strategy, since by default we are creating persistance this should be set to 100 max unavailable.
 strategy:
-  rollingUpdate:
-    maxSurge: 100%
-    maxUnavailable: 100%
+  type: Recreate
 
 imagePullSecrets: []
 nameOverride: ""
@@ -59,7 +58,21 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-podAnnotations: {}
+podAnnotations:
+  ad.datadoghq.com/simple-ssh-bastion.logs: >-
+    [
+      {
+        "source": "sshd",
+        "service": "ssh-bastion",
+        "log_processing_rules": [
+          {
+            "type": "exclude_at_match",
+            "name": "exclude_healthcheck_logs",
+            "pattern": "(Connection closed by .* port .*|Connection from .* port .* on .* rdomain|kex_exchange_identification: Connection closed by remote host)"
+          }
+        ]
+      }
+    ]
 podLabels: {}
 
 podSecurityContext: {}
