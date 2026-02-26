@@ -9,7 +9,7 @@ spec:
   {{- if .Values.strategy }}
   strategy:
     {{- with .Values.strategy }}
-      {{- toYaml . | nindent 2 }}
+      {{- toYaml . | nindent 4 }}
     {{- end }}
   {{- end }}
   selector:
