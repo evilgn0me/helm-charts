@@ -54,6 +54,20 @@ entries:
   simple-ssh-bastion:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2026-05-25T11:27:50.537802472Z"
+    description: Simple ssh-bastion chart, to create bastion host in kubernetes based
+      on pure alpine docker image.
+    digest: f9fc411c25f79c08dadc72f3557e4117f27f14cc79a90a718ee9e4580a035296
+    maintainers:
+    - email: evilgn0me@users.noreply.github.com
+      name: evilgn0me
+    name: simple-ssh-bastion
+    type: application
+    urls:
+    - https://github.com/evilgn0me/helm-charts/releases/download/simple-ssh-bastion-0.1.11/simple-ssh-bastion-0.1.11.tgz
+    version: 0.1.11
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2026-02-26T12:41:16.706762047Z"
     description: Simple ssh-bastion chart, to create bastion host in kubernetes based
       on pure alpine docker image.
@@ -259,4 +273,4 @@ entries:
     urls:
     - https://github.com/evilgn0me/helm-charts/releases/download/supportpal-0.1.0/supportpal-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-26T12:41:16.70683282Z"
+generated: "2026-05-25T11:27:50.537888884Z"
