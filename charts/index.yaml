@@ -2,6 +2,25 @@ apiVersion: v1
 entries:
   ingressmonitorcontroller:
   - apiVersion: v2
+    appVersion: 0.0.3
+    created: "2026-06-08T13:59:04.69209261Z"
+    description: IngressMonitorController Operator chart that runs on kubernetes
+    digest: 05055f8a02e25ed7947c7bad843986988f79175fb7a9e98f4353350b7dc61061
+    home: https://github.com/stakater/IngressMonitorController
+    icon: https://raw.githubusercontent.com/stakater/IngressMonitorController/master/assets/web/IMC-round-100px.png
+    keywords:
+    - IngressMonitorController
+    - IngressMonitorController Operator
+    - kubernetes
+    - Ingress
+    - Route
+    name: ingressmonitorcontroller
+    sources:
+    - https://github.com/stakater/IngressMonitorController
+    urls:
+    - https://evilgn0me.github.io/helm-charts/charts/ingressmonitorcontroller-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
     appVersion: 0.0.2
     created: "2026-06-08T13:45:57.792248704Z"
     description: IngressMonitorController Operator chart that runs on kubernetes
@@ -39,4 +58,4 @@ entries:
     urls:
     - https://evilgn0me.github.io/helm-charts/charts/ingressmonitorcontroller-0.0.1.tgz
     version: 0.0.1
-generated: "2026-06-08T13:45:57.791380999Z"
+generated: "2026-06-08T13:59:04.691157607Z"
