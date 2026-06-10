@@ -1,0 +1,19 @@
+apiVersion: v2
+name: ingressmonitorcontroller
+description: IngressMonitorController Operator chart that runs on kubernetes
+
+# Helm chart Version
+version: 0.0.2
+
+# Application version to be deployed
+appVersion: 0.0.2
+
+keywords:
+  - IngressMonitorController
+  - IngressMonitorController Operator
+  - kubernetes
+  - Ingress
+  - Route
+home: https://github.com/evilgn0me/IngressMonitorController
+sources:
+  - https://github.com/evilgn0me/IngressMonitorController
