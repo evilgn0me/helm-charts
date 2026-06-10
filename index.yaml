@@ -51,6 +51,25 @@ entries:
     urls:
     - https://github.com/evilgn0me/helm-charts/releases/download/domain_exporter-0.1.0/domain_exporter-0.1.0.tgz
     version: 0.1.0
+  ingressmonitorcontroller:
+  - apiVersion: v2
+    appVersion: 0.0.2
+    created: "2026-06-10T12:45:36.644720677Z"
+    description: IngressMonitorController Operator chart that runs on kubernetes
+    digest: 4706a166134c3b1b20e6c5771e4e91fafec3470a8995a1d5399429fda9fa24fd
+    home: https://github.com/evilgn0me/IngressMonitorController
+    keywords:
+    - IngressMonitorController
+    - IngressMonitorController Operator
+    - kubernetes
+    - Ingress
+    - Route
+    name: ingressmonitorcontroller
+    sources:
+    - https://github.com/evilgn0me/IngressMonitorController
+    urls:
+    - https://github.com/evilgn0me/helm-charts/releases/download/ingressmonitorcontroller-0.0.2/ingressmonitorcontroller-0.0.2.tgz
+    version: 0.0.2
   simple-ssh-bastion:
   - apiVersion: v2
     appVersion: 1.16.0
@@ -273,4 +292,4 @@ entries:
     urls:
     - https://github.com/evilgn0me/helm-charts/releases/download/supportpal-0.1.0/supportpal-0.1.0.tgz
     version: 0.1.0
-generated: "2026-05-25T11:27:50.537888884Z"
+generated: "2026-06-10T12:45:36.644764813Z"
